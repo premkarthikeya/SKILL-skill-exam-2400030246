@@ -1,0 +1,49 @@
+name: microservices-deployment
+
+services:
+  postgresdb:
+    image: postgres:16-alpine
+    container_name: postgresdb
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-123456789}
+      POSTGRES_DB: newskill_exam_2400030246
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d newskill_exam_2400030246"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - microservices-network
+
+  exam-service:
+    image: premkarthikeya/exam-service:latest
+    build:
+      context: ./MovieProject/MovieProject
+      dockerfile: Dockerfile
+    container_name: exam-service
+    ports:
+      - "9001:7080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresdb:5432/newskill_exam_2400030246
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-123456789}
+    depends_on:
+      postgresdb:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - microservices-network
+
+volumes:
+  postgres_data:
+
+networks:
+  microservices-network:
+    driver: bridge
