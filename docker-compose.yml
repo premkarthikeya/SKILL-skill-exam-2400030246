@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-123456789}
+      POSTGRES_PASSWORD: 123456789
       POSTGRES_DB: newskill_exam_2400030246
     ports:
       - "5432:5432"
